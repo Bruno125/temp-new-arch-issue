@@ -2,15 +2,34 @@
 
 ![Build](https://github.com/Bruno125/temp-new-arch-issue/workflows/Pre%20Merge%20Checks/badge.svg)
 
-This is your new React Native Reproducer project.
+
+Showcases that `extraModules:for:` is not being called.
+
+|When not called|Patching `RCTReactNativeFactory` *|
+|-|-|
+|<img src="https://github.com/user-attachments/assets/a7299d4f-3c85-43f2-9a88-a5a7b15eb660" width=250>|<img src="https://github.com/user-attachments/assets/53d715eb-d9b0-42a8-baff-5d031204a994" width=250>|
+
+
+*The patched version is when I manually add this to `RCTReactNativeFactory`:
+
+```objc
+- (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge {
+	if ([_delegate respondsToSelector:@selector(extraModulesForBridge:)]) {
+		return [_delegate extraModulesForBridge:bridge];
+	} else {
+		return @[];
+	}
+}
+```
+
 
 # Reproducer TODO list
 
 - [x] 1. Create a new reproducer project.
-- [ ] 2. Git clone your repository locally.
-- [ ] 3. Edit the project to reproduce the failure you're seeing.
-- [ ] 4. Push your changes, so that Github Actions can run the CI.
-- [ ] 5. Make sure the repository is public and share the link with the issue you reported.
+- [X] 2. Git clone your repository locally.
+- [X] 3. Edit the project to reproduce the failure you're seeing.
+- [X] 4. Push your changes, so that Github Actions can run the CI.
+- [X] 5. Make sure the repository is public and share the link with the issue you reported.
 
 # How to use this Reproducer
 
