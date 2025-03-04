@@ -19,6 +19,11 @@ class AppDelegate: RCTAppDelegate {
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     self.bundleURL()
   }
+  
+  override func extraModules(for bridge: RCTBridge) -> [any RCTBridgeModule] {
+    ExtraModulesChecker.wasCalled = true
+    return [ExtraModulesChecker()]
+  }
 
   override func bundleURL() -> URL? {
 #if DEBUG
