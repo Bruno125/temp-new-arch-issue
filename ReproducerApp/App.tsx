@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   ScrollView,
@@ -14,6 +14,7 @@ import {
   Text,
   useColorScheme,
   View,
+  NativeModules,
 } from 'react-native';
 
 import {
@@ -56,20 +57,39 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [extraModulesCalled, setExtraModulesCalled] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkExtraModules = async () => {
+      try {
+        const { ExtraModulesChecker } = NativeModules;
+
+        if (!ExtraModulesChecker) {
+          setError('Native module not found in NativeModules');
+          return;
+        }
+
+        if (!ExtraModulesChecker.wasExtraModulesCalled) {
+          setError('wasExtraModulesCalled method not found in module');
+          return;
+        }
+
+        ExtraModulesChecker.wasExtraModulesCalled((wasCalled: boolean) => {
+          setExtraModulesCalled(wasCalled);
+        });
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Unknown error occurred');
+      }
+    };
+
+    checkExtraModules();
+  }, []);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
   const safePadding = '5%';
 
   return (
@@ -89,20 +109,17 @@ function App(): React.JSX.Element {
             paddingHorizontal: safePadding,
             paddingBottom: safePadding,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
+          <Section title="Extra Modules Status">
+            {error ? (
+              <Text style={{color: 'red'}}>Error: {error}</Text>
+            ) : extraModulesCalled === null ? (
+              <Text>Checking extra modules status...</Text>
+            ) : extraModulesCalled ? (
+              <Text style={{color: 'green'}}>Extra modules called!</Text>
+            ) : (
+              <Text style={{color: 'red'}}>Extra modules not called</Text>
+            )}
           </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
         </View>
       </ScrollView>
     </View>
